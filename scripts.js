@@ -13,14 +13,14 @@ function Gameboard() {
         }
     }
 
-    const getSize = () => size;
-
-    const markSquare = function (player, row, column) {
-        board[row][column].set(player);
-    }
-
     // Return deep copy of board to avoid editing the original
     const get = () => board.map((row) => row.map((square) => square.get()));
+
+    const getSize = () => size;
+
+    const markSquare = function (token, row, column) {
+        board[row][column].set(token);
+    }
 
     return {
         get, getSize, markSquare
@@ -51,9 +51,8 @@ function Player(name, marker) {
     }
 }
 
-function GameController(playerOne, playerTwo) {
+function GameController() {
     const board = Gameboard();
-    const players = { 0: playerOne, 1: playerTwo };
     let activePlayer = 0;
     let gameOver = false;
 
@@ -86,10 +85,6 @@ function GameController(playerOne, playerTwo) {
         return null;
     };
 
-    const announceWinner = function (winner) {
-        console.log(`${players[winner].getName()} has won, congratulations!`);
-    }
-
     const isOver = () => gameOver;
 
     const isValidPlay = function (row, column) {
@@ -111,23 +106,23 @@ function GameController(playerOne, playerTwo) {
     }
 
     const placeMarker = function (row, column) {
-        if (isOver) {
-            console.log("Sorry, game is over.");
-            return;
+        if (isOver()) {
+            return { status: "over" };
         }
 
         if (!isValidPlay(row, column)) {
-            return;
+            return { status: "invalid" };
         }
 
         board.markSquare(activePlayer, row, column);
 
         const winner = checkWinner();
         if (winner !== null) {
-            announceWinner(winner);
             gameOver = true;
+            return { status: "win", winner }
         } else {
             switchActivePlayer();
+            return { status: "continue" }
         }
     }
 
@@ -135,20 +130,32 @@ function GameController(playerOne, playerTwo) {
     return {
         placeMarker,
         isOver,
-        getBoard: board.get
+        getBoard: board.get,
     }
 }
 
-function displayController() {
+function DisplayController(game) {
+    const domGame = document.querySelector(".game");
+    const domSquares = [];
+    for (const square of domGame.querySelectorAll(".square")) {
+        const row = parseInt(square.dataset.row);
+        const column = parseInt(square.dataset.column);
+        if (!domSquares[row]) domSquares[row] = [];
+        domSquares[row][column] = square;
+    }
 
-    const renderBoard = function (board) {
+    const players = [
+        Player("Player One", "X"), Player("Player Two", "O")
+    ];
+
+    function renderBoardAscii(board) {
         const boardAscii = board.map((row) => {
             return row
                 .map((square) => {
                     if (square === 0) {
-                        return players[0].getMarker();
+                        return markers[0];
                     } else if (square === 1) {
-                        return players[1].getMarker();
+                        return markers[1];
                     } else {
                         return "-"
                     }
@@ -159,25 +166,45 @@ function displayController() {
         console.log(boardAscii);
     }
 
-    const getPlayerNames = function () {
-        let playerOne = null;
-        let playerTwo = null;
+    function renderBoard(board) {
+        domSquares.forEach((rowArray, row) =>
+            rowArray.forEach((square, column) => {
+                const occupant = board[row][column];
 
-        while (!playerOne) {
-            playerOne = prompt("Please enter the name of the first player:");
-        }
-
-        while (!playerTwo) {
-            playerTwo = prompt("Please enter the name of the second player:");
-        }
-
-        return { playerOne, playerTwo };
+                square.textContent = occupant === null ? "" : players[occupant].getMarker();
+            }));
     }
 
-    const { playerOne, playerTwo } = getPlayerNames();
-    const game = GameController(playerOne, playerTwo);
+    function announceWinner(winner) {
+        alert(`${players[winner].getName()} has won, congratulations!`);
+    }
+
+    const bindSquareListeners = function () {
+        domGame.addEventListener("click", (e) => {
+            const square = e.target.closest(".square");
+            if (!square) return;
+
+            const row = parseInt(square.dataset.row);
+            const column = parseInt(square.dataset.column);
+
+            const result = game.placeMarker(row, column);
+
+            renderBoard(game.getBoard());
+
+            if (result.status === "win") {
+                announceWinner(result.winner);
+            }
+
+        })
+    }
+
     renderBoard(game.getBoard());
+    bindSquareListeners();
 }
 
-displayController();
+
+(function () {
+    const game = GameController();
+    DisplayController(game);
+})();
 
