@@ -77,12 +77,41 @@ function Player(name, marker) {
 
 function GameController(playerOne, playerTwo) {
     const board = Gameboard();
-
     const players = { 0: playerOne, 1: playerTwo };
     let activePlayer = 0;
+    let gameOver = false;
 
     const switchActivePlayer = function () {
         activePlayer = activePlayer === 0 ? 1 : 0;
+    }
+
+    const checkWinner = function () {
+        const currentBoard = board.get();
+        const boardSize = board.getSize();
+
+        const possibleLines = [];
+        possibleLines.push(...currentBoard);            // rows
+        possibleLines.push(                             // columns
+            ...currentBoard[0].map((_, column) => {
+                return currentBoard.map((row) => row[column])
+            })
+        );
+        possibleLines.push(                             // diagonals
+            currentBoard.map(((row, i) => row[2 - i])),
+            currentBoard.map(((row, i) => row[0 + i]))
+        );
+
+        for (const line of possibleLines) {
+            if (line.every(square => square === line[0])) {
+                return line[0];
+            }
+        }
+
+        return null;
+    };
+
+    const announceWinner = function (winner) {
+        console.log(`${players[winner]} has won, congratulations!`);
     }
 
     const renderBoard = function () {
@@ -122,20 +151,27 @@ function GameController(playerOne, playerTwo) {
     }
 
     const placeMarker = function (row, column) {
-        if (isValidPlay(row, column)) {
+        if (gameOver) {
+            console.log("Sorry, game is over.");
+            return;
+        }
+
+        if (!isValidPlay(row, column)) {
             return;
         }
 
         board.markSquare(activePlayer, row, column);
         renderBoard();
 
-        if (board.winner()) {
-            // announce winner
-            // end game
+        const winner = checkWinner();
+        if (winner !== null) {
+            announceWinner(winner);
+            gameOver = true;
         } else {
             switchActivePlayer();
         }
     }
+
 
     renderBoard();
 
