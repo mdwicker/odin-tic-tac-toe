@@ -15,8 +15,6 @@ function Gameboard() {
 
     const getSize = () => size;
 
-    const getSquare = (row, column) => board[row][column].get();
-
     const markSquare = function (player, row, column) {
         board[row][column].set(player);
     }
@@ -25,7 +23,7 @@ function Gameboard() {
     const get = () => board.map((row) => row.map((square) => square.get()));
 
     return {
-        markSquare, getSize, get, getSquare
+        get, getSize, markSquare
     };
 }
 
@@ -102,7 +100,7 @@ function GameController(playerOne, playerTwo) {
         );
 
         for (const line of possibleLines) {
-            if (line.every(square => square === line[0])) {
+            if (line.every(square => (square === line[0] && square !== null))) {
                 return line[0];
             }
         }
@@ -111,7 +109,7 @@ function GameController(playerOne, playerTwo) {
     };
 
     const announceWinner = function (winner) {
-        console.log(`${players[winner]} has won, congratulations!`);
+        console.log(`${players[winner].getName()} has won, congratulations!`);
     }
 
     const renderBoard = function () {
@@ -140,7 +138,7 @@ function GameController(playerOne, playerTwo) {
             return false;
         }
 
-        const squareContents = board.getSquare(row, column);
+        const squareContents = board.get()[row][column];
 
         if (squareContents === null) {
             return true;
