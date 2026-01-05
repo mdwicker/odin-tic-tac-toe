@@ -42,28 +42,6 @@ function Square() {
 }
 
 function Player(name, marker) {
-    /*
-    Is this the best way to do this? I can think of other options:
-    1. Initialize the name within the Player object. Creating a player
-    object would automatically involve getting a name from the user.
-    This is nice and tidy and ensures that players aren't floating around 
-    without names. That honestly seems quite important, lol.
-    BUT the problem is that it's possible that one might need to get
-    info from outside to set it. Like with a GUI. This is worse with the
-    marker, since you can't have both players choosing the same marker.
-    
-    2. Just have the player object take two arguments, one for name
-    and one for marker. Honestly that might be the best option. Only 
-    allow player creation after names and markers have been selected...
-    Ok I'm convinced, I'm gonna use that method. So, for posterity, I'll
-    record what I was originally doing. I had declared the name and
-    marker variables without initializing them at all, then created
-    functions to set their value. I liked how that felt like a compromise,
-    letting the Player object handle their initialization but with input
-    from the outside. BUT it's too risky to allow a player with no name
-    or marker to exist. 
-    */
-
     const getName = () => name;
 
     const getMarker = () => marker;
@@ -95,12 +73,12 @@ function GameController(playerOne, playerTwo) {
             })
         );
         possibleLines.push(                             // diagonals
-            currentBoard.map(((row, i) => row[2 - i])),
+            currentBoard.map(((row, i) => row[boardSize - 1 - i])),
             currentBoard.map(((row, i) => row[0 + i]))
         );
 
         for (const line of possibleLines) {
-            if (line.every(square => (square === line[0] && square !== null))) {
+            if (line.every(square => (square === line[0] && line[0] !== null))) {
                 return line[0];
             }
         }
@@ -112,23 +90,7 @@ function GameController(playerOne, playerTwo) {
         console.log(`${players[winner].getName()} has won, congratulations!`);
     }
 
-    const renderBoard = function () {
-        const boardAscii = board.get().map((row) => {
-            return row
-                .map((square) => {
-                    if (square === 0) {
-                        return players[0].getMarker();
-                    } else if (square === 1) {
-                        return players[1].getMarker();
-                    } else {
-                        return "-"
-                    }
-                })
-                .join(" ");
-        }).join("\n");
-
-        console.log(boardAscii);
-    }
+    const isOver = () => gameOver;
 
     const isValidPlay = function (row, column) {
         const size = board.getSize();
@@ -149,7 +111,7 @@ function GameController(playerOne, playerTwo) {
     }
 
     const placeMarker = function (row, column) {
-        if (gameOver) {
+        if (isOver) {
             console.log("Sorry, game is over.");
             return;
         }
@@ -159,7 +121,6 @@ function GameController(playerOne, playerTwo) {
         }
 
         board.markSquare(activePlayer, row, column);
-        renderBoard();
 
         const winner = checkWinner();
         if (winner !== null) {
@@ -171,10 +132,52 @@ function GameController(playerOne, playerTwo) {
     }
 
 
-    renderBoard();
-
     return {
-        placeMarker
+        placeMarker,
+        isOver,
+        getBoard: board.get
     }
 }
+
+function displayController() {
+
+    const renderBoard = function (board) {
+        const boardAscii = board.map((row) => {
+            return row
+                .map((square) => {
+                    if (square === 0) {
+                        return players[0].getMarker();
+                    } else if (square === 1) {
+                        return players[1].getMarker();
+                    } else {
+                        return "-"
+                    }
+                })
+                .join(" ");
+        }).join("\n");
+
+        console.log(boardAscii);
+    }
+
+    const getPlayerNames = function () {
+        let playerOne = null;
+        let playerTwo = null;
+
+        while (!playerOne) {
+            playerOne = prompt("Please enter the name of the first player:");
+        }
+
+        while (!playerTwo) {
+            playerTwo = prompt("Please enter the name of the second player:");
+        }
+
+        return { playerOne, playerTwo };
+    }
+
+    const { playerOne, playerTwo } = getPlayerNames();
+    const game = GameController(playerOne, playerTwo);
+    renderBoard(game.getBoard());
+}
+
+displayController();
 
