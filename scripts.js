@@ -13,57 +13,27 @@ function Gameboard() {
         }
     }
 
+    const getSize = () => size;
+
+    const getSquare = (row, column) => board[row][column].get();
+
     const markSquare = function (player, row, column) {
-        if (player !== 0 && player !== 1) {
-            console.log(`Gameboard should only receive 0 or 1, not ${player}`);
-        }
         board[row][column].set(player);
     }
 
-    const isValidPlay = function (player, row, column) {
-        if (player !== 0 && player !== 1) {
-            console.log(`Gameboard should only receive 0 or 1, not ${player}`);
-        }
-
-        if (row >= size || column >= size) {
-            console.log("Position does not exist. Row and column must be 0, 1, or 2.");
-            return false;
-        }
-
-        const squareContents = board[row][column].get();
-
-        if (squareContents === null) {
-            return true;
-        } else {
-            console.log("That square is already occupied.");
-            return false;
-        }
-    }
-
-    const get = () => board;
-
-    const winner = function () {
-        /*
-        K, how to determine winner...EITHER I cycle through all rows
-        and columns and check manually.
-        OR I change the markers to 1's and 2's and do math?
-        No, because 3 could be made by 3 1's or 2+1. So...1 and 5?
-        then if anything totals 3 or 15, we know the winner. that feels
-        odd and hacky, but it works really smoothly lol. Idk.
-        */
-        return null;
-    }
+    // Return deep copy of board to avoid editing the original
+    const get = () => board.map((row) => row.map((square) => square.get()));
 
     return {
-        markSquare, isValidPlay, winner, get
+        markSquare, getSize, get, getSquare
     };
 }
 
 function Square() {
     let value = null;
 
-    const set = function (player) {
-        value = player;
+    const set = function (inputValue) {
+        value = inputValue;
     };
 
     const get = () => value;
@@ -119,9 +89,9 @@ function GameController(playerOne, playerTwo) {
         const boardAscii = board.get().map((row) => {
             return row
                 .map((square) => {
-                    if (square.get() === 0) {
+                    if (square === 0) {
                         return players[0].getMarker();
-                    } else if (square.get() === 1) {
+                    } else if (square === 1) {
                         return players[1].getMarker();
                     } else {
                         return "-"
@@ -133,8 +103,26 @@ function GameController(playerOne, playerTwo) {
         console.log(boardAscii);
     }
 
+    const isValidPlay = function (row, column) {
+        const size = board.getSize();
+
+        if (row >= size || column >= size) {
+            console.log(`Position does not exist. Row and column must be less than ${size}.`);
+            return false;
+        }
+
+        const squareContents = board.getSquare(row, column);
+
+        if (squareContents === null) {
+            return true;
+        } else {
+            console.log("That square is already occupied.");
+            return false;
+        }
+    }
+
     const placeMarker = function (row, column) {
-        if (!board.isValidPlay(activePlayer, row, column)) {
+        if (isValidPlay(row, column)) {
             return;
         }
 
@@ -155,25 +143,4 @@ function GameController(playerOne, playerTwo) {
         placeMarker
     }
 }
-
-
-
-
-
-/**
- * Ok, so how will this work? I think he's onto something. The Gameboard
- * will consist of Squares, which willl have one of three states:
- * a player1 token, a player2 token, or nothing.
- * GameController will manage the gameplay. Setting up initial players,
- * getting the active player, switching turns, checking for wins.
- * Player will handle the players. It should know their name, their marker,
- * and that's probably it. displaying the results. 
- * 
- Now, how should I handle the name and marker input? One option would be
- to initialize it within the Player object. That feels by far the tidiest
- option, but the problem is that they dont have enough info! B/c you need
- to know who has chosen what. One option could be to just assign the markers
- for them...that could be best, doing it randomly would be fair. Also much
- easier!
- */
 
