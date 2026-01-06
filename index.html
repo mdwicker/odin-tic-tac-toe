@@ -8,16 +8,34 @@
     <title>Tic-Tac-Toe</title>
 </head>
 <body>
-    <div class="game">
-        <div class="square" data-row="0" data-column="0"></div>
-        <div class="square" data-row="0" data-column="1"></div>
-        <div class="square" data-row="0" data-column="2"></div>
-        <div class="square" data-row="1" data-column="0"></div>
-        <div class="square" data-row="1" data-column="1"></div>
-        <div class="square" data-row="1" data-column="2"></div>
-        <div class="square" data-row="2" data-column="0"></div>
-        <div class="square" data-row="2" data-column="1"></div>
-        <div class="square" data-row="2" data-column="2"></div>
+    <div class="container">
+        <h1 class="title">Tic-Tac-Toe</h1>
+
+        <p class="message">Player One's turn!</p>
+
+        <div class="game">
+            <div class="square" data-row="0" data-column="0"></div>
+            <div class="square" data-row="0" data-column="1"></div>
+            <div class="square" data-row="0" data-column="2"></div>
+            <div class="square" data-row="1" data-column="0"></div>
+            <div class="square" data-row="1" data-column="1"></div>
+            <div class="square" data-row="1" data-column="2"></div>
+            <div class="square" data-row="2" data-column="0"></div>
+            <div class="square" data-row="2" data-column="1"></div>
+            <div class="square" data-row="2" data-column="2"></div>
+        </div>
+        <button id="new-game-btn">New Game</button>
+
+        <div class="name-inputs">
+            <div class="name-input">
+                <input type="text" id="player-one-name-input">
+                <label for="player-one-name-input">Player One Name</label>
+            </div>
+            <div class="name-input">
+                <input type="text" id="player-two-name-input">
+                <label for="player-two-name-input">Player Two Name</label>
+            </div>
+        </div>
     </div>
 
     <script src="scripts.js"></script>

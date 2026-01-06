@@ -215,7 +215,13 @@ function DisplayController(game) {
             rowArray.forEach((square, column) => {
                 const occupant = board[row][column];
 
+                if (occupant !== null) {
+                    square.textContent = players[occupant].getMarker();
+                    square.classList.add(`player-${occupant === 0 ? "one" : "two"}`);
+                }
+
                 square.textContent = occupant === null ? "" : players[occupant].getMarker();
+                square.classList.add()
             })
         });
     }
