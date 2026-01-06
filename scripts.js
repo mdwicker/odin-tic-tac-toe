@@ -27,6 +27,7 @@ function Gameboard() {
     };
 }
 
+
 function Square() {
     let value = null;
 
@@ -41,6 +42,7 @@ function Square() {
     };
 }
 
+
 function Player(name, marker) {
     const getName = () => name;
 
@@ -51,16 +53,33 @@ function Player(name, marker) {
     }
 }
 
+
 function GameController() {
     const board = Gameboard();
     let activePlayer = 0;
     let gameOver = false;
 
-    const switchActivePlayer = function () {
+    function switchActivePlayer() {
         activePlayer = activePlayer === 0 ? 1 : 0;
     }
 
-    const checkWinner = function () {
+    function checkEndConditions() {
+        const winner = checkWin();
+        if (winner !== false) {
+            gameOver = true;
+            return { status: "win", winner };
+        }
+
+        if (checkTie()) {
+            gameOver = true;
+            return { status: "tie" };
+        }
+
+        return false;
+    }
+
+
+    function checkWin() {
         const currentBoard = board.get();
         const boardSize = board.getSize();
 
@@ -82,12 +101,24 @@ function GameController() {
             }
         }
 
-        return null;
+        return false;
     };
+
+    function checkTie() {
+        const boardState = board.get();
+
+        // Return true if no squares remain empty
+        return !boardState.some((row) => row.some((square) => square === null));
+    }
+
+    function continueGame() {
+        switchActivePlayer();
+        return { status: "continue" }
+    }
 
     const isOver = () => gameOver;
 
-    const isValidPlay = function (row, column) {
+    function isValidPlay(row, column) {
         const size = board.getSize();
 
         if (row >= size || column >= size) {
@@ -116,23 +147,16 @@ function GameController() {
 
         board.markSquare(activePlayer, row, column);
 
-        const winner = checkWinner();
-        if (winner !== null) {
-            gameOver = true;
-            return { status: "win", winner }
-        } else {
-            switchActivePlayer();
-            return { status: "continue" }
-        }
+        return checkEndConditions() || continueGame();
     }
 
 
     return {
         placeMarker,
-        isOver,
         getBoard: board.get,
     }
 }
+
 
 function DisplayController(game) {
     const domGame = document.querySelector(".game");
@@ -167,16 +191,21 @@ function DisplayController(game) {
     }
 
     function renderBoard(board) {
-        domSquares.forEach((rowArray, row) =>
+        domSquares.forEach((rowArray, row) => {
             rowArray.forEach((square, column) => {
                 const occupant = board[row][column];
 
                 square.textContent = occupant === null ? "" : players[occupant].getMarker();
-            }));
+            })
+        });
     }
 
-    function announceWinner(winner) {
-        alert(`${players[winner].getName()} has won, congratulations!`);
+    function announceResults(result) {
+        if (result.status === "win") {
+            alert(`${players[result.winner].getName()} has won, congratulations!`);
+        } else if (result.status === "tie") {
+            alert("It's a tie!");
+        }
     }
 
     const bindSquareListeners = function () {
@@ -191,10 +220,9 @@ function DisplayController(game) {
 
             renderBoard(game.getBoard());
 
-            if (result.status === "win") {
-                announceWinner(result.winner);
+            if (result.status !== "continue") {
+                announceResults(result);
             }
-
         })
     }
 
