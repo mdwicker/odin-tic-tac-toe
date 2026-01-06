@@ -2,8 +2,6 @@ function Gameboard() {
     const size = 3;
     const board = [];
 
-    createBoard();
-
     function createBoard() {
         for (let rowIndex = 0; rowIndex < size; rowIndex++) {
             board[rowIndex] = [];
@@ -16,14 +14,14 @@ function Gameboard() {
     // Return deep copy of board to avoid editing the original
     const get = () => board.map((row) => row.map((square) => square.get()));
 
-    const getSize = () => size;
-
     const markSquare = function (token, row, column) {
         board[row][column].set(token);
     }
 
+    createBoard();
+
     return {
-        get, getSize, markSquare
+        get, markSquare
     };
 }
 
@@ -31,11 +29,15 @@ function Gameboard() {
 function Square() {
     let value = null;
 
-    const set = function (inputValue) {
-        value = inputValue;
-    };
-
     const get = () => value;
+
+    const set = (inputValue) => {
+        if (value === null) {
+            value = inputValue;
+        } else {
+            console.log(`Square value already set to ${value}.`);
+        }
+    };
 
     return {
         set, get
@@ -44,12 +46,9 @@ function Square() {
 
 
 function Player(name, marker) {
-    const getName = () => name;
-
-    const getMarker = () => marker;
-
     return {
-        getMarker, getName
+        getName: () => name,
+        getMarker: () => marker
     }
 }
 
@@ -59,8 +58,23 @@ function GameController() {
     let activePlayer = 0;
     let gameOver = false;
 
-    function switchActivePlayer() {
-        activePlayer = activePlayer === 0 ? 1 : 0;
+    function isValidPlay(row, column) {
+        const boardState = board.get()
+        const size = boardState.length;
+
+        if (row >= size || column >= size) {
+            console.log(`Position does not exist. Row and column must be less than ${size}.`);
+            return false;
+        }
+
+        const squareContents = boardState[row][column];
+
+        if (squareContents !== null) {
+            console.log("That square is already occupied.");
+            return false;
+        }
+
+        return true
     }
 
     function checkEndConditions() {
@@ -78,10 +92,9 @@ function GameController() {
         return false;
     }
 
-
     function checkWin() {
         const currentBoard = board.get();
-        const boardSize = board.getSize();
+        const boardSize = currentBoard.length;
 
         const possibleLines = [];
         possibleLines.push(...currentBoard);            // rows
@@ -112,32 +125,13 @@ function GameController() {
     }
 
     function continueGame() {
-        switchActivePlayer();
+        // Switch active player
+        activePlayer = activePlayer === 0 ? 1 : 0;
         return { status: "continue" }
     }
 
-    const isOver = () => gameOver;
-
-    function isValidPlay(row, column) {
-        const size = board.getSize();
-
-        if (row >= size || column >= size) {
-            console.log(`Position does not exist. Row and column must be less than ${size}.`);
-            return false;
-        }
-
-        const squareContents = board.get()[row][column];
-
-        if (squareContents === null) {
-            return true;
-        } else {
-            console.log("That square is already occupied.");
-            return false;
-        }
-    }
-
     const placeMarker = function (row, column) {
-        if (isOver()) {
+        if (gameOver) {
             return { status: "over" };
         }
 
@@ -160,17 +154,43 @@ function GameController() {
 
 function DisplayController(game) {
     const domGame = document.querySelector(".game");
-    const domSquares = [];
-    for (const square of domGame.querySelectorAll(".square")) {
-        const row = parseInt(square.dataset.row);
-        const column = parseInt(square.dataset.column);
-        if (!domSquares[row]) domSquares[row] = [];
-        domSquares[row][column] = square;
+    const domSquares = getDomSquares();
+    const players = [Player("Player One", "X"), Player("Player Two", "O")];
+
+    renderBoard(game.getBoard());
+    bindSquareListeners();
+
+    function getDomSquares() {
+        const domSquares = [];
+
+        for (const square of domGame.querySelectorAll(".square")) {
+            const row = parseInt(square.dataset.row);
+            const column = parseInt(square.dataset.column);
+
+            if (!domSquares[row]) domSquares[row] = [];
+            domSquares[row][column] = square;
+        }
+
+        return domSquares;
     }
 
-    const players = [
-        Player("Player One", "X"), Player("Player Two", "O")
-    ];
+    function bindSquareListeners() {
+        domGame.addEventListener("click", (e) => {
+            const square = e.target.closest(".square");
+            if (!square) return;
+
+            const row = parseInt(square.dataset.row);
+            const column = parseInt(square.dataset.column);
+
+            const result = game.placeMarker(row, column);
+
+            renderBoard(game.getBoard());
+
+            if (result.status !== "continue") {
+                announceResults(result);
+            }
+        })
+    }
 
     function renderBoardAscii(board) {
         const boardAscii = board.map((row) => {
@@ -207,27 +227,6 @@ function DisplayController(game) {
             alert("It's a tie!");
         }
     }
-
-    const bindSquareListeners = function () {
-        domGame.addEventListener("click", (e) => {
-            const square = e.target.closest(".square");
-            if (!square) return;
-
-            const row = parseInt(square.dataset.row);
-            const column = parseInt(square.dataset.column);
-
-            const result = game.placeMarker(row, column);
-
-            renderBoard(game.getBoard());
-
-            if (result.status !== "continue") {
-                announceResults(result);
-            }
-        })
-    }
-
-    renderBoard(game.getBoard());
-    bindSquareListeners();
 }
 
 
