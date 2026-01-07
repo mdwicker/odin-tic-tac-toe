@@ -74,17 +74,18 @@ function GameController() {
     let activePlayer = 0;
     let gameOver = false;
     let winner = null;
+    let winningCoordinates = [];
 
     function isValidPlay(row, column) {
-        const boardState = board.get()
-        const size = boardState.length;
+        const currentBoard = board.get()
+        const size = currentBoard.length;
 
         if (row >= size || column >= size) {
             console.log(`Position does not exist. Row and column must be less than ${size}.`);
             return false;
         }
 
-        const squareContents = boardState[row][column];
+        const squareContents = currentBoard[row][column];
 
         if (squareContents !== null) {
             console.log("That square is already occupied.");
@@ -95,10 +96,11 @@ function GameController() {
     }
 
     function checkEndConditions() {
-        const winningPlayer = checkWin();
-        if (winningPlayer !== false) {
+        const win = findWin();
+        if (win) {
             gameOver = true;
-            winner = winningPlayer;
+            winner = win.player;
+            winningCoordinates = win.squares;
         } else if (checkTie()) {
             gameOver = true;
         } else {
@@ -106,36 +108,77 @@ function GameController() {
         }
     }
 
-    function checkWin() {
+    function findWin() {
+
         const currentBoard = board.get();
-        const boardSize = currentBoard.length;
+        const width = currentBoard.length;
+        const height = currentBoard[0].length;
 
-        const possibleLines = [];
-        possibleLines.push(...currentBoard);            // rows
-        possibleLines.push(                             // columns
-            ...currentBoard[0].map((_, column) => {
-                return currentBoard.map((row) => row[column])
-            })
-        );
-        possibleLines.push(                             // diagonals
-            currentBoard.map(((row, i) => row[boardSize - 1 - i])),
-            currentBoard.map(((row, i) => row[0 + i]))
-        );
+        function squaresMatch(squares) {
+            if (!squares) {
+                return false;
+            }
 
-        for (const line of possibleLines) {
-            if (line.every(square => (square === line[0] && line[0] !== null))) {
-                return line[0];
+            return squares.every(square => square === squares[0] && square !== null);
+        }
+
+        // Check rows
+        for (let row = 0; row < width; row++) {
+            if (squaresMatch(currentBoard[row])) {
+                return {
+                    player: currentBoard[row][0],
+                    squares: currentBoard[row].map((_, column) => {
+                        return { row, column };
+                    })
+                };
+            }
+        }
+        // Check columns
+        for (let column = 0; column < height; column++) {
+            const columnSquares = currentBoard.map((row) => row[column]);
+            if (squaresMatch(columnSquares)) {
+                return {
+                    player: currentBoard[0][column],
+                    squares: currentBoard.map((_, row) => {
+                        return { row, column };
+                    })
+                };
             }
         }
 
-        return false;
+        // Check diagonals
+        const diagonalA = currentBoard.map((row, i) => row[width - 1 - i]);
+        if (squaresMatch(diagonalA)) {
+            return {
+                player: currentBoard[row][width - 1],
+                squares: currentBoard.map((_, i) => {
+                    return {
+                        row: i,
+                        column: width - 1 - i
+                    }
+                })
+            }
+        }
+
+        const diagonalB = currentBoard.map((row, i) => row[i]);
+        if (squaresMatch(diagonalB)) {
+            return {
+                player: currentBoard[0][0],
+                squares: currentBoard.map((_, i) => {
+                    return {
+                        row: i,
+                        column: i
+                    }
+                })
+            }
+        }
     }
 
     function checkTie() {
-        const boardState = board.get();
+        const currentBoard = board.get();
 
         // Return true if no squares remain empty
-        return !boardState.some((row) => row.some((square) => square === null));
+        return !currentBoard.some((row) => row.some((square) => square === null));
     }
 
     const placeMarker = function (row, column) {
@@ -158,6 +201,8 @@ function GameController() {
 
     const getWinner = () => winner;
 
+    const getWinningCoordinates = () => winningCoordinates;
+
     const getActivePlayer = () => activePlayer;
 
     const reset = function () {
@@ -172,6 +217,7 @@ function GameController() {
         isOver,
         hasWinner,
         getWinner,
+        getWinningCoordinates,
         getActivePlayer,
         reset,
         getBoard: board.get
@@ -211,8 +257,7 @@ function DisplayController(game) {
 
             const row = parseInt(square.dataset.row);
             const column = parseInt(square.dataset.column);
-
-            const result = game.placeMarker(row, column);
+            game.placeMarker(row, column);
 
             render();
         })

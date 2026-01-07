@@ -6,86 +6,6 @@
     font-family: Avenir, Montserrat, Corbel, 'URW Gothic', source-sans-pro, sans-serif;
 }
 
-.container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-
-    min-height: 100vh;
-    gap: 24px;
-    padding: 12px;
-}
-
-.display {
-    text-align: center;
-}
-
-.game {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(3, minmax(0, 1fr));
-    width: min(75vw, 350px);
-    aspect-ratio: 1 / 1;
-}
-
-.square {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    font-size: 3.5rem;
-    font-weight: 600;
-    line-height: 0.9;
-    padding-top: 0.2rem;
-    cursor: pointer;
-    user-select: none;
-}
-
-.square:hover {
-    background-color: rgba(0, 0, 0, 0.06);
-}
-
-.square:not(:nth-child(3n)) {
-    /* All except the ends of the rows */
-    border-right: var(--grid-line-border);
-}
-
-.square:not(:nth-child(-n+3)) {
-    /* All except the first row */
-    border-top: var(--grid-line-border);
-}
-
-.square.player-one {
-    color: var(--player-one-color);
-}
-
-.square.player-two {
-    color: var(--player-two-color);
-}
-
-.title {
-    font-size: 2.4rem;
-    font-weight: 600;
-}
-
-.message {
-    font-size: 1.6rem;
-    font-weight: 400;
-}
-
-.name-inputs {
-    display: flex;
-    gap: 8px;
-    margin-top: 24px;
-}
-
-.name-input {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
 input {
     border: none;
     border-bottom: 1px solid black;
@@ -101,16 +21,103 @@ label {
 }
 
 button {
-    background-color: black;
-    color: white;
-    border: none;
     padding: 12px 24px;
-    cursor: pointer;
-    font-size: 1.1rem;
+    border: none;
     border-radius: 4px;
-    letter-spacing: 0.5px;
+
+    background-color: black;
+    
+    color: white;
+    font-size: 1.1rem;
+    
+    cursor: pointer;
 }
 
 button:hover {
     opacity: 0.8;
+}
+
+
+/* Containers  */
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 100vh;
+    gap: 24px;
+    padding: 12px;
+}
+
+.game {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    width: min(75vw, 350px);
+    aspect-ratio: 1 / 1;
+}
+
+.name-inputs {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+
+/* Components */
+
+.title {
+    font-size: 2.4rem;
+    font-weight: 600;
+}
+
+.message {
+    font-size: 1.6rem;
+    font-weight: 400;
+}
+
+.square {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-size: 3.5rem;
+    font-weight: 600;
+
+    /* Bump text down to accomodate for top-heavy font */
+    line-height: 0.8;
+    padding-top: 0.2rem;
+
+    cursor: pointer;
+    user-select: none;
+}
+
+.square:hover {
+    background-color: rgba(0, 0, 0, 0.06);
+}
+
+.square:not(:nth-child(3n)) {
+    /* All except the ends of the rows */
+    border-right: var(--grid-line-border);
+}
+
+.square:not(:nth-last-child(-n+3)) {
+    /* All except the last row */
+    border-bottom: var(--grid-line-border);
+}
+
+.square.player-one {
+    color: var(--player-one-color);
+}
+
+.square.player-two {
+    color: var(--player-two-color);
+}
+
+.name-input {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
