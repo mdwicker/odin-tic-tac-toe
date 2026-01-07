@@ -183,11 +183,11 @@ function GameController() {
 
     const placeMarker = function (row, column) {
         if (gameOver) {
-            return { status: "over" };
+            return;
         }
 
         if (!isValidPlay(row, column)) {
-            return { status: "invalid" };
+            return;
         }
 
         board.markSquare(activePlayer, row, column);
@@ -210,6 +210,7 @@ function GameController() {
         activePlayer = 0;
         gameOver = false;
         winner = null;
+        winningCoordinates = [];
     };
 
     return {
@@ -261,7 +262,20 @@ function DisplayController(game) {
             game.placeMarker(row, column);
 
             render();
-        })
+        });
+
+        domGame.addEventListener("keydown", (e) => {
+            const square = e.target.closest(".square");
+            if (!square) return;
+
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault(); // prevent scrolling with Space
+                const row = parseInt(square.dataset.row);
+                const column = parseInt(square.dataset.column);
+                game.placeMarker(row, column);
+                render();
+            }
+        });
     }
 
     function bindNameInputListeners() {
