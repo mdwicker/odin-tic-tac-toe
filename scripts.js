@@ -150,7 +150,7 @@ function GameController() {
         const diagonalA = currentBoard.map((row, i) => row[width - 1 - i]);
         if (squaresMatch(diagonalA)) {
             return {
-                player: currentBoard[0][width - 1],
+                player: diagonalA[0],
                 squares: currentBoard.map((_, i) => {
                     return {
                         row: i,
@@ -163,7 +163,7 @@ function GameController() {
         const diagonalB = currentBoard.map((row, i) => row[i]);
         if (squaresMatch(diagonalB)) {
             return {
-                player: currentBoard[0][0],
+                player: diagonalB[0],
                 squares: currentBoard.map((_, i) => {
                     return {
                         row: i,
@@ -314,7 +314,9 @@ function DisplayController(game) {
 
                 const occupant = board[row][column];
 
-                if (occupant !== null) {
+                if (occupant === null) {
+                    square.textContent = "";
+                } else {
                     square.textContent = players[occupant].getMarker();
                     square.classList.add(`player-${occupant === 0 ? "one" : "two"}`);
                 }
@@ -334,7 +336,7 @@ function DisplayController(game) {
     }
 
     function renderNewGameButton(button) {
-        button.classList.toggle("focus", game.isOver());
+        button.classList.toggle("highlight", game.isOver());
     }
 
     function renderDisplay() {

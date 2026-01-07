@@ -39,7 +39,11 @@ button:hover {
     opacity: 0.8;
 }
 
-button.focus {
+button:focus {
+    outline: 3px solid var(--accent-gold);
+}
+
+button.highlight {
     transform: scale(1.1);
     outline: 3px solid var(--accent-gold);
 }
