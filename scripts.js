@@ -150,7 +150,7 @@ function GameController() {
         const diagonalA = currentBoard.map((row, i) => row[width - 1 - i]);
         if (squaresMatch(diagonalA)) {
             return {
-                player: currentBoard[row][width - 1],
+                player: currentBoard[0][width - 1],
                 squares: currentBoard.map((_, i) => {
                     return {
                         row: i,
@@ -229,6 +229,7 @@ function DisplayController(game) {
     const domDisplay = document.querySelector(".message");
     const domGame = document.querySelector(".game");
     const domSquares = getDomSquares();
+    const newGameBtn = document.getElementById("new-game-btn");
     const players = [Player("Player One", "X"), Player("Player Two", "O")];
 
     renderBoard(game.getBoard());
@@ -275,7 +276,6 @@ function DisplayController(game) {
     }
 
     function bindNewGameListener() {
-        const newGameBtn = document.getElementById("new-game-btn");
         newGameBtn.addEventListener("click", (e) => {
             game.reset();
             render();
@@ -286,6 +286,7 @@ function DisplayController(game) {
         const board = game.getBoard()
         renderBoard(board);
         renderDisplay();
+        renderNewGameButton(newGameBtn);
     }
 
     function renderBoardAscii(board) {
@@ -309,6 +310,8 @@ function DisplayController(game) {
     function renderBoard(board) {
         domSquares.forEach((rowArray, row) => {
             rowArray.forEach((square, column) => {
+                square.classList.remove("player-one", "player-two", "win", "game-over");
+
                 const occupant = board[row][column];
 
                 if (occupant !== null) {
@@ -316,10 +319,22 @@ function DisplayController(game) {
                     square.classList.add(`player-${occupant === 0 ? "one" : "two"}`);
                 }
 
-                square.textContent = occupant === null ? "" : players[occupant].getMarker();
-                square.classList.add()
+                if (game.isOver()) {
+                    square.classList.add("game-over")
+                }
             })
         });
+
+        if (game.hasWinner()) {
+            const winningCoordinates = game.getWinningCoordinates();
+            winningCoordinates.forEach((coord) => {
+                domSquares[coord.row][coord.column].classList.add("win");
+            })
+        }
+    }
+
+    function renderNewGameButton(button) {
+        button.classList.toggle("focus", game.isOver());
     }
 
     function renderDisplay() {

@@ -2,6 +2,7 @@
     --grid-line-border: 3px solid #111;
     --player-one-color: #2f7d4e;
     --player-two-color: #1f6fb2;
+    --accent-gold: #c9a24d;
 
     font-family: Avenir, Montserrat, Corbel, 'URW Gothic', source-sans-pro, sans-serif;
 }
@@ -31,10 +32,16 @@ button {
     font-size: 1.1rem;
     
     cursor: pointer;
+    transition: scale 0.1s ease;
 }
 
 button:hover {
     opacity: 0.8;
+}
+
+button.focus {
+    transform: scale(1.1);
+    outline: 3px solid var(--accent-gold);
 }
 
 
@@ -92,9 +99,11 @@ button:hover {
 
     cursor: pointer;
     user-select: none;
+
+    transition: font-size 0.1s ease, text-shadow 0.1s ease;
 }
 
-.square:hover {
+.square:hover:not(.game-over) {
     background-color: rgba(0, 0, 0, 0.06);
 }
 
@@ -114,6 +123,15 @@ button:hover {
 
 .square.player-two {
     color: var(--player-two-color);
+}
+
+.square.win {
+    font-size: 4rem;
+    text-shadow: var(--accent-gold) 0 0 15px;
+}
+
+.square.game-over {
+    cursor: auto;
 }
 
 .name-input {
