@@ -14,11 +14,11 @@ function Gameboard() {
     // Return deep copy of board to avoid editing the original
     const get = () => board.map((row) => row.map((square) => square.get()));
 
-    const markSquare = function (token, row, column) {
+    const markSquare = (token, row, column) => {
         board[row][column].set(token);
     }
 
-    const clear = function () {
+    const clear = () => {
         board.forEach((row) => row.forEach((square) => square.clear()));
     }
 
@@ -35,7 +35,7 @@ function Square() {
 
     const get = () => value;
 
-    const set = function (inputValue) {
+    const set = (inputValue) => {
         if (value === null) {
             value = inputValue;
         } else {
@@ -43,7 +43,7 @@ function Square() {
         }
     };
 
-    const clear = function () {
+    const clear = () => {
         value = null;
     };
 
@@ -181,7 +181,7 @@ function GameController() {
         return !currentBoard.some((row) => row.some((square) => square === null));
     }
 
-    const placeMarker = function (row, column) {
+    const placeMarker = (row, column) => {
         if (gameOver) {
             return;
         }
@@ -205,7 +205,7 @@ function GameController() {
 
     const getActivePlayer = () => activePlayer;
 
-    const reset = function () {
+    const reset = () => {
         board.clear();
         activePlayer = 0;
         gameOver = false;
